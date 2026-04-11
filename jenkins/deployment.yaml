@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+  namespace: jenkins
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: jenkins
+          image: jenkins/jenkins:lts-jdk17
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+            - containerPort: 50000
+          env:
+            - name: JAVA_OPTS
+              value: "-Djenkins.install.runSetupWizard=true"
+          volumeMounts:
+            - name: jenkins-home
+              mountPath: /var/jenkins_home
+          # Lab-friendly way to install Ansible inside the Jenkins container
+          # (runs on every pod start).
+          command: ["/bin/bash", "-lc"]
+          args:
+            - |
+              set -e
+              apt-get update
+              apt-get install -y --no-install-recommends ansible git openssh-client ca-certificates curl
+              rm -rf /var/lib/apt/lists/*
+              exec /usr/bin/tini -- /usr/local/bin/jenkins.sh
+      volumes:
+        - name: jenkins-home
+          persistentVolumeClaim:
+            claimName: jenkins-pvc
