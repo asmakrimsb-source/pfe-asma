@@ -13,9 +13,10 @@ if ! command -v helm &> /dev/null; then
   HELM_INSTALL_DIR=$PWD/bin ./get_helm.sh --no-sudo
 fi
 
-# Install kubectl if not available
-if ! command -v kubectl &> /dev/null; then
+# Install kubectl if not available or corrupted
+if ! command -v kubectl &> /dev/null || ! kubectl version --client &> /dev/null; then
   echo "Installing kubectl..."
+  rm -f bin/kubectl
   KUBECTL_VERSION=$(curl --retry 3 -L -s https://dl.k8s.io/release/stable.txt)
   curl --retry 3 --retry-connrefused -fLO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
   chmod +x kubectl
