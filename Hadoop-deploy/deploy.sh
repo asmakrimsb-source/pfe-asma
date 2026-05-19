@@ -20,6 +20,12 @@ if ! command -v kubectl &> /dev/null; then
   mv kubectl bin/
 fi
 
+# Export KUBECONFIG if it exists
+if [ -f "../configs/config" ]; then
+  export KUBECONFIG="$PWD/../configs/config"
+  echo "Using KUBECONFIG=$KUBECONFIG"
+fi
+
 # Update vars.yaml with variables provided by Jenkins parameters
 cat <<EOF > vars.yaml
 k8s_namespace: "${NAMESPACE:-hadoop1}"
