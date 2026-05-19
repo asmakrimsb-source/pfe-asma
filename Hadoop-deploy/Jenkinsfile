@@ -16,14 +16,18 @@ pipeline {
 
         stage('Prepare Environment') {
             steps {
-                sh 'chmod +x deploy.sh'
+                dir('Hadoop-deploy') {
+                    sh 'chmod +x deploy.sh'
+                }
             }
         }
 
         stage('Deploy Hadoop via Ansible') {
             steps {
-                withEnv(["NAMESPACE=${params.NAMESPACE}", "REPLICAS=${params.REPLICAS}"]) {
-                    sh './deploy.sh'
+                dir('Hadoop-deploy') {
+                    withEnv(["NAMESPACE=${params.NAMESPACE}", "REPLICAS=${params.REPLICAS}"]) {
+                        sh './deploy.sh'
+                    }
                 }
             }
         }
