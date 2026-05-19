@@ -34,8 +34,10 @@ pipeline {
 
         stage('Verify Deployment') {
             steps {
-                sh 'kubectl get pods -n ${params.NAMESPACE}'
-                sh 'kubectl get svc -n ${params.NAMESPACE}'
+                dir('Hadoop-deploy') {
+                    sh 'export PATH=$PWD/bin:$PATH && kubectl get pods -n ${params.NAMESPACE}'
+                    sh 'export PATH=$PWD/bin:$PATH && kubectl get svc -n ${params.NAMESPACE}'
+                }
             }
         }
     }

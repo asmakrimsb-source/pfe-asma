@@ -6,11 +6,7 @@
     - vars.yaml
   tasks:
     - name: Ensure namespace exists
-      kubernetes.core.k8s:
-        name: "{{ namespace }}"
-        api_version: v1
-        kind: Namespace
-        state: present
+      command: kubectl create namespace {{ k8s_namespace }}
       ignore_errors: yes
 
     - name: Add pfisterer-hadoop Helm repository
@@ -27,6 +23,6 @@
     - name: Deploy or Upgrade Hadoop via Helm
       command: >
         helm upgrade --install hadoop pfisterer-hadoop/hadoop
-        --namespace "{{ namespace }}"
+        --namespace "{{ k8s_namespace }}"
         --create-namespace
         -f values.yaml

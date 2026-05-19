@@ -1,2 +1,2 @@
-namespace: "hadoop1"
+k8s_namespace: "hadoop1"
 replicas: 2
