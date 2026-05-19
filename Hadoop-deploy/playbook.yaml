@@ -1,0 +1,32 @@
+---
+- name: Deploy Hadoop Cluster with Helm on Kubernetes
+  hosts: all
+  gather_facts: false
+  vars_files:
+    - vars.yaml
+  tasks:
+    - name: Ensure namespace exists
+      kubernetes.core.k8s:
+        name: "{{ namespace }}"
+        api_version: v1
+        kind: Namespace
+        state: present
+      ignore_errors: yes
+
+    - name: Add pfisterer-hadoop Helm repository
+      command: helm repo add pfisterer-hadoop https://pfisterer.github.io/apache-hadoop-helm/
+
+    - name: Update Helm repositories
+      command: helm repo update
+
+    - name: Generate custom values.yaml from template
+      template:
+        src: values.yaml.j2
+        dest: values.yaml
+
+    - name: Deploy or Upgrade Hadoop via Helm
+      command: >
+        helm upgrade --install hadoop pfisterer-hadoop/hadoop
+        --namespace "{{ namespace }}"
+        --create-namespace
+        -f values.yaml

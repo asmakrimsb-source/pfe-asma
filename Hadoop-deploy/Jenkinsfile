@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'NAMESPACE', defaultValue: 'hadoop1', description: 'Namespace for Hadoop cluster')
+        string(name: 'REPLICAS', defaultValue: '2', description: 'Number of DataNode and NodeManager replicas')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout code from the Hadoop-deploy git repository
+                checkout scm
+            }
+        }
+
+        stage('Prepare Environment') {
+            steps {
+                sh 'chmod +x deploy.sh'
+            }
+        }
+
+        stage('Deploy Hadoop via Ansible') {
+            steps {
+                withEnv(["NAMESPACE=${params.NAMESPACE}", "REPLICAS=${params.REPLICAS}"]) {
+                    sh './deploy.sh'
+                }
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh 'kubectl get pods -n ${params.NAMESPACE}'
+                sh 'kubectl get svc -n ${params.NAMESPACE}'
+            }
+        }
+    }
+}
